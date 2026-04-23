@@ -116,7 +116,7 @@ msg_alerta: .asciz "ALERTA: 3 errores consecutivos\n"
 
 ```
 make
-cat logs.txt | ./analyzer
+cat logs_D.txt | ./analyzer
 ```
 
 ## 🧠 Conclusión
