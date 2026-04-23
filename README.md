@@ -1,5 +1,21 @@
+<img width="1024" height="572" alt="image" src="https://github.com/user-attachments/assets/3c2212af-d04b-439a-b3fc-d15331180b0f" />
 
-# Práctica 1
+
+# <img width="1601" height="70" alt="cooltext506609702966455" src="https://github.com/user-attachments/assets/7c1380e5-f0a2-4ee6-94a6-1983c645242e" />
+
+---
+
+- Nombre: Sergio Diaz Enciso
+- No.Control: 23211949
+- Horario: 4-5
+
+---
+
+## Evidecia de Implementacion del programa 
+- Edicion del codigo: https://asciinema.org/a/LXMeH9Ny9xFqaX6g
+- Pruebas: https://asciinema.org/a/66vzxiij3DDONhGy
+
+---
 
 ## Implementación de un Mini Cloud Log Analyzer en ARM64
 
@@ -8,158 +24,105 @@
 **Lenguaje:** ARM64 Assembly (GNU Assembler) + Bash + GNU Make
 
 ---
+# ☁️ Mini Cloud Log Analyzer en ARM64
 
-## Introducción
+## 📌 Introducción
 
-Los sistemas modernos de cómputo en la nube generan continuamente registros (*logs*) que permiten monitorear el estado de servicios, detectar fallas y activar alertas ante eventos críticos.
+En los sistemas en la nube, el análisis de logs es esencial para detectar errores y monitorear el funcionamiento de los servicios.  
+En este proyecto se desarrolla un analizador de códigos HTTP utilizando ensamblador ARM64, lo que permite comprender cómo se procesan los datos a bajo nivel mediante el uso directo de memoria, registros y llamadas al sistema.
 
-En esta práctica se desarrollará un módulo simplificado de análisis de logs, implementado en **ARM64 Assembly**, inspirado en tareas reales de monitoreo utilizadas en sistemas cloud, observabilidad y administración de infraestructura.
+## 🧾 Descripción del programa
 
-El programa procesará códigos de estado HTTP suministrados mediante entrada estándar (stdin):
+El programa procesa códigos HTTP leídos desde la entrada estándar (stdin) y realiza las siguientes tareas:
 
-```bash id="y1gcmc"
-cat logs.txt | ./analyzer
+- Clasifica los códigos en:
+  - 2xx → Éxitos  
+  - 4xx → Errores de cliente  
+  - 5xx → Errores de servidor  
+- Lleva un conteo de cada tipo
+- Implementa la Variante D:
+  - Detecta tres errores consecutivos
+  - Muestra una alerta cuando esta condición se cumple
+- Genera un reporte final en consola
+
+El análisis se realiza mediante lectura de bloques de memoria y procesamiento carácter por carácter.
+
+## 📂 Estructura del proyecto
+
+```
+cloud-log-analyzer/
+├── README.md
+├── Makefile
+├── run.sh
+├── src/
+│   └── analyzer.s
+├── data/
+│   ├── logs_A.txt
+│   ├── logs_B.txt
+│   ├── logs_C.txt
+│   ├── logs_D.txt
+│   └── logs_E.txt
+├── tests/
+│   ├── test.sh
+│   └── expected_outputs.txt
+└── instructor/
+    └── VARIANTES.md
 ```
 
----
+- Makefile: Automatiza la compilación  
+- logs.txt: Archivo de prueba con códigos HTTP  
+- analyzer.s: Código en ensamblador ARM64  
 
-## Objetivo general
+## ⚙️ Código modificado (Variante D)
 
-Diseñar e implementar, en lenguaje ensamblador ARM64, una solución para procesar registros de eventos y detectar condiciones definidas según la variante asignada.
+Para implementar la detección de tres errores consecutivos, se realizaron los siguientes cambios:
 
----
+Se agregó un contador de errores consecutivos:
 
-## Objetivos específicos
-
-El estudiante aplicará:
-
-* programación en ARM64 bajo Linux
-* manejo de registros
-* direccionamiento y acceso a memoria
-* instrucciones de comparación
-* estructuras iterativas en ensamblador
-* saltos condicionales
-* uso de syscalls Linux
-* compilación con GNU Make
-* control de versiones con GitHub Classroom
-
-Estos temas se alinean con contenidos clásicos de flujo de control, herramientas GNU, manejo de datos y convenciones de programación en ensamblador.   
-
----
-
-## Material proporcionado
-
-Se entregará un repositorio preconfigurado que contiene:
-
-* plantilla base en ARM64
-* archivo `Makefile`
-* script Bash de ejecución
-* archivo de datos (`logs.txt`)
-* pruebas iniciales
-* secciones marcadas con `TODO`
-
-El estudiante deberá completar la lógica correspondiente.
-
----
-
-## Variantes de la práctica
-
-### Variante A
-
-Contabilizar:
-
-* respuestas exitosas (2xx)
-* errores del cliente (4xx)
-* errores del servidor (5xx)
-
----
-
-### Variante B
-
-Determinar el código de estado más frecuente.
-
----
-
-### Variante C
-
-Detectar el primer evento crítico (503).
-
----
-
-### Variante D
-
-Detectar tres errores consecutivos.
-
----
-
-### Variante E
-
-Calcular índice de salud:
-
-```text id="2u4vvx"
-Health Score = 100 - (errores × 10)
+```asm
+mov x28, #0   // contador de errores consecutivos
 ```
 
----
+Se modificó la función clasificar_codigo para:
 
-## Compilación
+- Incrementar el contador si el código es mayor o igual a 400  
+- Reiniciar el contador si no es error  
+- Mostrar una alerta al detectar 3 errores consecutivos  
 
-```bash id="bmubtb"
+```asm
+es_error:
+    add x28, x28, #1
+    cmp x28, #3
+    b.ne clasificar_fin
+
+    adrp x0, msg_alerta
+    add x0, x0, :lo12:msg_alerta
+    bl write_cstr
+
+    mov x28, #0
+    b clasificar_fin
+
+no_es_error:
+    mov x28, #0
+```
+
+También se agregó el mensaje en la sección de datos:
+
+```asm
+msg_alerta: .asciz "ALERTA: 3 errores consecutivos\n"
+```
+
+## ▶️ Ejecución
+
+```
 make
+cat logs_D.txt | ./analyzer
 ```
 
----
+## 🧠 Conclusión
 
-## Ejecución
+El desarrollo de este programa permitió comprender cómo se pueden implementar procesos de análisis de datos directamente en lenguaje ensamblador, utilizando únicamente llamadas al sistema operativo.
 
-```bash id="gcqlf2"
-cat logs.txt | ./analyzer
-```
+Además, se aplicaron conceptos clave como el manejo de memoria y registros, la conversión de datos de ASCII a enteros, el control de flujo mediante saltos condicionales y el procesamiento secuencial de información.
 
----
-
-## Entregables
-
-Cada estudiante deberá entregar en su repositorio:
-
-* archivo fuente ARM64 funcional
-* solución implementada
-* README explicando diseño y lógica utilizada
-* evidencia de ejecución
-* commits realizados en GitHub Classroom
-
----
-
-## Criterios de evaluación
-
-| Criterio                    | Ponderación |
-| --------------------------- | ----------- |
-| Compilación correcta        | 20%         |
-| Correctitud de la solución  | 35%         |
-| Uso adecuado de ARM64       | 25%         |
-| Documentación y comentarios | 10%         |
-| Evidencia de pruebas        | 10%         |
-
----
-
-## Restricciones
-
-No está permitido:
-
-* resolver la lógica en C
-* resolver la lógica en Python
-* modificar la variante asignada
-* omitir el uso de ARM64 Assembly
-
----
-
-## Competencia a desarrollar
-
-Comprender cómo un problema de procesamiento de datos es implementado a nivel máquina mediante instrucciones ARM64.
-
----
-
-## Nota
-
-Aunque este problema puede resolverse fácilmente en lenguajes de alto nivel, el propósito de la práctica es implementar **cómo lo resolvería la arquitectura**, no únicamente obtener el resultado.
-
+La implementación de la detección de errores consecutivos demuestra cómo es posible construir lógica de monitoreo similar a la utilizada en sistemas reales, pero desde un nivel mucho más bajo, fortaleciendo la comprensión del funcionamiento interno del hardware y del sistema operativo.
