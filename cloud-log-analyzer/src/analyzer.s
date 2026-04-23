@@ -43,6 +43,8 @@ msg_4xx:            .asciz "Errores 4xx: "
 msg_5xx:            .asciz "Errores 5xx: "
 msg_fin_linea:      .asciz "\n"
 
+msg_alerta: .asciz "ALERTA: 3 errores consecutivos\n"
+
 .section .text
 .global _start
 
@@ -51,6 +53,7 @@ _start:
     mov x19, #0                  // exitos_2xx
     mov x20, #0                  // errores_4xx
     mov x21, #0                  // errores_5xx
+    mov x28, #0     // contador de errores consecutivos
 
     // Estado del parser
     mov x22, #0                  // numero_actual
@@ -170,27 +173,48 @@ salida_error:
 // Incrementa el contador correspondiente: 2xx, 4xx o 5xx.
 // -----------------------------------------------------------------------------
 clasificar_codigo:
+    // --- 2xx ---
     cmp x0, #200
-    b.lt clasificar_fin
+    b.lt no_es_error
     cmp x0, #299
     b.gt revisar_4xx
     add x19, x19, #1
+
+    // no es error → reset contador
+    mov x28, #0
     b clasificar_fin
 
 revisar_4xx:
     cmp x0, #400
-    b.lt clasificar_fin
+    b.lt no_es_error
     cmp x0, #499
     b.gt revisar_5xx
     add x20, x20, #1
-    b clasificar_fin
+
+    b es_error
 
 revisar_5xx:
     cmp x0, #500
-    b.lt clasificar_fin
+    b.lt no_es_error
     cmp x0, #599
-    b.gt clasificar_fin
+    b.gt no_es_error
     add x21, x21, #1
+
+es_error:
+    add x28, x28, #1          // incrementar consecutivos
+    cmp x28, #3
+    b.ne clasificar_fin
+
+    // 👉 ALERTA: 3 errores consecutivos
+    adrp x0, msg_alerta
+    add x0, x0, :lo12:msg_alerta
+    bl write_cstr
+
+    mov x28, #0               // reiniciar contador
+    b clasificar_fin
+
+no_es_error:
+    mov x28, #0               // reset si no es error
 
 clasificar_fin:
     ret
