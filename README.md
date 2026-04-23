@@ -1,7 +1,7 @@
 <img width="1024" height="572" alt="image" src="https://github.com/user-attachments/assets/3c2212af-d04b-439a-b3fc-d15331180b0f" />
 
 
-# Práctica 1
+# <img width="1601" height="70" alt="cooltext506609702966455" src="https://github.com/user-attachments/assets/7c1380e5-f0a2-4ee6-94a6-1983c645242e" />
 
 ---
 
@@ -12,8 +12,8 @@
 ---
 
 ## Evidecia de Implementacion del programa 
-Edicion del codigo: https://asciinema.org/a/LXMeH9Ny9xFqaX6g
-Pruebas: 
+- Edicion del codigo: https://asciinema.org/a/LXMeH9Ny9xFqaX6g
+- Pruebas: https://asciinema.org/a/66vzxiij3DDONhGy
 
 ---
 
@@ -51,11 +51,22 @@ El análisis se realiza mediante lectura de bloques de memoria y procesamiento c
 
 ```
 cloud-log-analyzer/
-│
+├── README.md
 ├── Makefile
-├── logs.txt
-└── src/
-    └── analyzer.s
+├── run.sh
+├── src/
+│   └── analyzer.s
+├── data/
+│   ├── logs_A.txt
+│   ├── logs_B.txt
+│   ├── logs_C.txt
+│   ├── logs_D.txt
+│   └── logs_E.txt
+├── tests/
+│   ├── test.sh
+│   └── expected_outputs.txt
+└── instructor/
+    └── VARIANTES.md
 ```
 
 - Makefile: Automatiza la compilación  
